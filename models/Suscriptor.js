@@ -1,11 +1,17 @@
 import mongoose from "mongoose";
+import generarNumeroSocio from "../helpers/generarNumeroSocio.js";
 
 const SuscriptorSchema = mongoose.Schema(
   {
     nombre: {
       type: String,
-      trim: true,
       required: true,
+    },
+    socio: {
+      type: Number,
+      required: true,
+      default: generarNumeroSocio(),
+      unique: true,
     },
     estado: {
       type: String,
@@ -14,8 +20,13 @@ const SuscriptorSchema = mongoose.Schema(
     },
     informacionPersonal: {
       imagen: {},
-      domicilio: {},
-      fechaNacimiento: { type: Date },
+      domicilio: { type: String },
+      dni: { type: Number },
+      celular: { type: Number },
+      correo: {},
+      genero: {},
+      fechaNacimiento: {},
+      notas: {},
     },
     tipoSuscripcion: {
       type: String,
@@ -28,14 +39,13 @@ const SuscriptorSchema = mongoose.Schema(
         type: Date,
         default: new Date(),
       },
-      fechaPagoSuscripcion: {
-        type: Array,
-      },
+      fechaPagoSuscripcion: { type: Array },
       fechaVencimientoSuscripcion: {
         type: Date,
+        default: new Date(),
       },
     },
-    rutina: { type: Array },
+    rutina: { type: Array, default: [""] },
     creador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",

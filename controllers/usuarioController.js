@@ -130,9 +130,32 @@ const nuevoPassword = async (req, res) => {
   }
 };
 
+const obtenerTiposSuscripcion = async (req, res) => {
+  const { usuario } = req;
+  const tiposSuscripcion = usuario.tiposSuscripcion;
+
+  console.log(tiposSuscripcion);
+  res.json({
+    tiposSuscripcion,
+  });
+};
+
+const editarValoresSuscripcion = async (req, res) => {
+  const { usuario } = req;
+
+  const tiposSuscripcion = usuario.tiposSuscripcion;
+  console.log(tiposSuscripcion);
+
+  usuario.tiposSuscripcion =
+    req.body.tiposSuscripcion || usuario.tiposSuscripcion;
+
+  res.json({
+    tiposSuscripcion,
+  });
+};
+
 const perfil = async (req, res) => {
   const { usuario } = req;
-  console.log("Desde perfil....");
   console.log(`Desde usuario, El nombre es: ${usuario.nombre}`);
   res.json(usuario);
 };
@@ -144,5 +167,7 @@ export {
   olvidePassword,
   validarToken,
   nuevoPassword,
+  obtenerTiposSuscripcion,
+  editarValoresSuscripcion,
   perfil,
 };

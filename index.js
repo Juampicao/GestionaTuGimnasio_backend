@@ -5,8 +5,11 @@ import cors from "cors";
 
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import suscriptoreRoutes from "./routes/suscriptoresRoutes.js";
+import estadisticasRoutes from "./routes/estadisticasRoutes.js";
 
 import Suscriptor from "./models/Suscriptor.js";
+import Usuario from "./models/Usuario.js";
+// import { verificarEstadoDeDeudas } from "./helpers/funciones.js";
 
 const app = express();
 app.use(express.json());
@@ -39,6 +42,7 @@ app.use(cors(corsOptions));
 // Routing
 app.use(`/usuarios`, usuarioRoutes);
 app.use(`/suscriptores`, suscriptoreRoutes);
+app.use(`/estadisticas`, estadisticasRoutes);
 
 const PORT = process.env.PORT || 4000;
 
@@ -46,5 +50,36 @@ app.listen(PORT, () => {
   console.log("Servidor Corriendo en el puerto 4000");
 });
 
-// const obtenerSuscriptor = await Suscriptor.find().select(`nombre estado`);
-// console.log(obtenerSuscriptor);
+const verificarEstadoDeDeudas = async () => {
+  // res.setHeader("Access-Control-Allow-Origin", "*");
+  // const { id } = req.params;
+
+  console.log("Verificando estado de deudas...");
+  let hoy = new Date();
+  // let suscriptoresTotales = await Suscriptor.find().count();
+  // console.log(suscriptoresTotales);
+
+  const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
+    { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
+    { $set: { estado: "Activo" } }
+  ).select("nombre fechas.fechaVencimientoSuscripcion");
+  console.log(verificarEstadoDeActivo);
+
+  const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
+    { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
+    { $set: { estado: "Deudor" } }
+  ).select("nombre fechas.fechaVencimientoSuscripcion");
+  console.log(verificarEstadoDeDeuda);
+
+  try {
+    // for (let i = 0; i < suscriptoresTotales; i++) {
+    const verificarEstados = await verificarEstadoDeDeudas();
+    //   return;
+    // }
+    res.json(verificarEstadoDeDeuda);
+    res.json(verificarEstadoDeActivo);
+  } catch (error) {
+    console.log(error);
+  }
+};
+// verificarEstadoDeDeudas();

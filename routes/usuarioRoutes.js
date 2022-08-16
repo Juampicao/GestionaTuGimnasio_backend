@@ -6,6 +6,8 @@ import {
   olvidePassword,
   validarToken,
   nuevoPassword,
+  obtenerTiposSuscripcion,
+  editarValoresSuscripcion,
   perfil,
 } from "../controllers/usuarioController.js";
 
@@ -28,6 +30,10 @@ router.post(`/login`, autenticar);
 router.get(`/confirmar/:token`, confirmar);
 router.post(`/olvide-password`, olvidePassword);
 router.route(`/olvide-password/:token`).get(validarToken).post(nuevoPassword); // Si es get, validarToken, si es POST, nuevoPassword.
+router
+  .route(`/obtenertipossuscripcion`)
+  .get(checkAuth, obtenerTiposSuscripcion)
+  .put(checkAuth, editarValoresSuscripcion);
 router.get(`/perfil`, checkAuth, perfil); // Con next(), va a perfil. Sino, no.
 
 export default router;
