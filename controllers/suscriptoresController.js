@@ -2,6 +2,8 @@ import Suscriptor from "../models/Suscriptor.js";
 import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
 import { generarId } from "../helpers/generarId.js";
 
+import Pagos from "../models/Pagos.js";
+
 const obtenerSuscriptores = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -41,6 +43,7 @@ const obtenerSuscriptorId = async (req, res) => {
 
   const { id } = req.params;
   const suscriptor = await Suscriptor.findById(id);
+  // const suscriptor2 = await Suscriptor.findById(id).populate("pagos");
 
   if (!suscriptor) {
     const error = new Error("Suscriptor No Encontrado");
@@ -284,6 +287,9 @@ const EditarPagoSuscripcion = async (req, res) => {
 const EliminarPagoSuscripcion = async (req, res) => {
   const { id } = req.params;
   const suscriptor = await Suscriptor.findById(id);
+  // 1 Buscar el suscriptor por id.
+  // 2 Buscar el pago del suscriptor que coincida con el id.
+  // 3 Eliminarlo.
   console.log(suscriptor);
 };
 

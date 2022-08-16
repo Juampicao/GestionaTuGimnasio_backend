@@ -46,27 +46,27 @@ const SuscriptorSchema = mongoose.Schema(
       },
     },
     rutina: { type: Array, default: [""] },
+
     creador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",
     },
-    // tareas: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Tarea",
-    //   },
-    // ],
-    // colaboradores: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Usuario",
-    //   },
-    // ],
+    pagos: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Pagos",
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Gasto = mongoose.model("Suscriptor", SuscriptorSchema);
-export default Gasto;
+let Suscriptor;
+if (mongoose.models.Suscriptor) {
+  Suscriptor = mongoose.model("Suscriptor");
+} else {
+  Suscriptor = mongoose.model("Suscriptor", SuscriptorSchema);
+}
+
+export default Suscriptor;
+// const Suscriptor = mongoose.model("Suscriptor", SuscriptorSchema);

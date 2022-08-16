@@ -6,6 +6,7 @@ import cors from "cors";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import suscriptoreRoutes from "./routes/suscriptoresRoutes.js";
 import estadisticasRoutes from "./routes/estadisticasRoutes.js";
+import pagosRoutes from "./routes/pagosRoutes.js";
 
 import Suscriptor from "./models/Suscriptor.js";
 import Usuario from "./models/Usuario.js";
@@ -43,6 +44,7 @@ app.use(cors(corsOptions));
 app.use(`/usuarios`, usuarioRoutes);
 app.use(`/suscriptores`, suscriptoreRoutes);
 app.use(`/estadisticas`, estadisticasRoutes);
+app.use(`/pagos`, pagosRoutes);
 
 const PORT = process.env.PORT || 4000;
 
@@ -50,36 +52,8 @@ app.listen(PORT, () => {
   console.log("Servidor Corriendo en el puerto 4000");
 });
 
-const verificarEstadoDeDeudas = async () => {
-  // res.setHeader("Access-Control-Allow-Origin", "*");
-  // const { id } = req.params;
-
-  console.log("Verificando estado de deudas...");
-  let hoy = new Date();
-  // let suscriptoresTotales = await Suscriptor.find().count();
-  // console.log(suscriptoresTotales);
-
-  const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
-    { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
-    { $set: { estado: "Activo" } }
-  ).select("nombre fechas.fechaVencimientoSuscripcion");
-  console.log(verificarEstadoDeActivo);
-
-  const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
-    { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
-    { $set: { estado: "Deudor" } }
-  ).select("nombre fechas.fechaVencimientoSuscripcion");
-  console.log(verificarEstadoDeDeuda);
-
-  try {
-    // for (let i = 0; i < suscriptoresTotales; i++) {
-    const verificarEstados = await verificarEstadoDeDeudas();
-    //   return;
-    // }
-    res.json(verificarEstadoDeDeuda);
-    res.json(verificarEstadoDeActivo);
-  } catch (error) {
-    console.log(error);
-  }
-};
-// verificarEstadoDeDeudas();
+// const AgregarUnaPropiedadAUnoEspecifico = await Suscriptor.updateOne(
+//   { nombre: "Alfredo" },
+//   { $set: { pagos: "62d30ddb9e73a0088fa71051" } }
+// );
+// console.log(AgregarUnaPropiedadAUnoEspecifico);
