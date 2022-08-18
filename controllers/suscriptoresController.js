@@ -1,5 +1,5 @@
 import Suscriptor from "../models/Suscriptor.js";
-import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
+// import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
 // import { generarId } from "../helpers/generarId.js";
 import { generarId } from "../helpers/funciones.js";
 
@@ -280,19 +280,52 @@ const pagarSuscripcion = async (req, res) => {
 };
 
 const EditarPagoSuscripcion = async (req, res) => {
-  const { id } = req.params;
-  const suscriptor = await Suscriptor.findById(req.body._id);
-  // console.log(suscriptor.nombre + " " + "Socio: " + suscriptor.socio);
-  console.log(suscriptor);
+  // const { id } = req.params;
+  // const suscriptor = await Suscriptor.findById(req.body._id);
+  // // console.log(suscriptor.nombre + " " + "Socio: " + suscriptor.socio);
+  // console.log(suscriptor);
 };
 
 const EliminarPagoSuscripcion = async (req, res) => {
-  const { id } = req.params;
-  const suscriptor = await Suscriptor.findById(id);
-  // 1 Buscar el suscriptor por id.
-  // 2 Buscar el pago del suscriptor que coincida con el id.
-  // 3 Eliminarlo.
-  console.log(suscriptor);
+  // const { id } = req.params;
+  // const suscriptor = await Suscriptor.findById(id);
+  // // 1 Buscar el suscriptor por id.
+  // // 2 Buscar el pago del suscriptor que coincida con el id.
+  // // 3 Eliminarlo.
+  // console.log(suscriptor);
+};
+
+const verificarEstadoDeDeudas = async (req, res) => {
+  // res.setHeader("Access-Control-Allow-Origin", "*");
+  // const { id } = req.params;
+
+  console.log("DESDE VERIFICANDO");
+  // let hoy = new Date();
+  // let suscriptoresTotales = await Suscriptor.find().count();
+  // console.log(suscriptoresTotales);
+
+  // const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
+  //   { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
+  //   { $set: { estado: "Activo" } }
+  // ).select("nombre fechas.fechaVencimientoSuscripcion");
+  // console.log(verificarEstadoDeActivo);
+
+  // const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
+  //   { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
+  //   { $set: { estado: "Deudor" } }
+  // ).select("nombre fechas.fechaVencimientoSuscripcion");
+  // console.log(verificarEstadoDeDeuda);
+
+  // try {
+  //   for (let i = 0; i < suscriptoresTotales; i++) {
+  //     const verificarEstados = await verificarEstadoDeDeudas();
+  //     return;
+  //   }
+  //   res.json(verificarEstadoDeDeuda);
+  //   res.json(verificarEstadoDeActivo);
+  // } catch (error) {
+  //   console.log(error);
+  // }
 };
 
 export {
@@ -306,4 +339,5 @@ export {
   EliminarPagoSuscripcion,
   EditarPagoSuscripcion,
   editarRutina,
+  verificarEstadoDeDeudas,
 };

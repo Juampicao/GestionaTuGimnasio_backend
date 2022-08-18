@@ -10,6 +10,7 @@ const PagosSchema = mongoose.Schema(
       notasPagoSuscripcion: { type: String, required: false },
       // fechaPagoSuscripcion: { type: Date, default: new Date() },
       fechaPagoSuscripcion: {},
+      metodoPago: { type: String },
     },
     suscriptorPagador: {
       type: mongoose.Schema.Types.ObjectId,

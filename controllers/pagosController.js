@@ -2,6 +2,7 @@ import Suscriptor from "../models/Suscriptor.js";
 import Pagos from "../models/Pagos.js";
 
 const pagarSuscripcion = async (req, res) => {
+  console.log("desde pagosController..");
   const pago = new Pagos(req.body);
 
   pago.creador = req.usuario._id;
@@ -9,20 +10,33 @@ const pagarSuscripcion = async (req, res) => {
 
   const suscriptor = await Suscriptor.findById(pago.suscriptorPagador);
 
+  console.log(req.body.metodoPago);
+  // 1° Pago Suscripcion
   const montoPagoSuscripcion = req.body.montoPagoSuscripcion;
-  // const fechaPagoSuscripcion = new Date(req.body.fechaPagoSuscripcion);
-  const fechaPagoSuscripcion = req.body.fechaPagoSuscripcion;
+  const fechaPagoSuscripcion = new Date(req.body.fechaPagoSuscripcion);
+  // const fechaPagoSuscripcion = req.body.fechaPagoSuscripcion;
   const notasPagoSuscripcion = req.body.notas;
+  const metodoPago = req.body.metodoPago;
+
+  // // 2° Nueva Fecha Vencimiento
+  const nuevaFechaVencimientoSuscripcion = new Date(
+    req.body.nuevaFechaVencimientoSuscripcion
+  );
+
+  suscriptor.fechas.fechaVencimientoSuscripcion =
+    nuevaFechaVencimientoSuscripcion;
 
   pago.pagoUnico = req.body.pagoUnico; // Guardar cualquier contenido.
   pago.pagoUnico = {
     montoPagoSuscripcion,
     fechaPagoSuscripcion,
     notasPagoSuscripcion,
+    metodoPago,
   };
 
   try {
     const nuevoPagoGuardado = await pago.save();
+    const nuevaFechaVencimientoGuardada = await suscriptor.save();
     suscriptor.pagos = suscriptor.pagos.concat(nuevoPagoGuardado._id);
     await suscriptor.save();
 
@@ -41,6 +55,7 @@ const EditarPagoSuscripcion = async (req, res) => {
   pago.pagoUnico.montoPagoSuscripcion = req.body.montoPagoSuscripcion;
   pago.pagoUnico.fechaPagoSuscripcion = req.body.fechaPagoSuscripcion;
   pago.pagoUnico.notas = req.body.notas;
+  pago.pagoUnico.metodoPago = req.body.metodoPago;
 
   try {
     const pagoEditado = await pago.save();
@@ -98,9 +113,11 @@ const GetPagoSuscripcionId = async (req, res) => {
   const { id } = req.params;
   const pago = await Pagos.findById(id).where("creador").equals(req.usuario);
 
+  console.log(pago);
   if (!pago) {
     const error = new Error("Ningun pago se ha encontrado");
     console.log(error);
+    res.json("Problema de existencia");
     return res.status(404).json({ msg: error.message });
   }
 

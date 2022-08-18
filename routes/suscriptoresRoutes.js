@@ -1,5 +1,5 @@
 import express from "express";
-import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
+// import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
 
 import {
   obtenerSuscriptores,
@@ -12,6 +12,7 @@ import {
   EliminarPagoSuscripcion,
   EditarPagoSuscripcion,
   editarRutina,
+  verificarEstadoDeDeudas,
 } from "../controllers/suscriptoresController.js";
 
 import checkAuth from "../middleware/checkAuth.js";
@@ -43,6 +44,6 @@ router
   .route("/obtenersuscriptorporsocio")
   .get(checkAuth, obtenerSuscriptorBySocio);
 
-// router.route("/verificarestadodeuda").get(checkAuth, verificarEstadoDeDeudas);
+router.route("/verificarestadodeuda").get(checkAuth, verificarEstadoDeDeudas);
 
 export default router;

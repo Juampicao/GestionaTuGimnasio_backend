@@ -51,3 +51,28 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log("Servidor Corriendo en el puerto 4000");
 });
+
+const verificarEstadoDeDeudas = async () => {
+  let hoy = new Date();
+  console.log(hoy);
+  let suscriptoresTotales = await Suscriptor.find().count();
+  console.log(suscriptoresTotales);
+
+  const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
+    { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
+    { $set: { estado: "Activo" } }
+  ).select("nombre fechas.fechaVencimientoSuscripcion");
+  console.log(verificarEstadoDeActivo);
+
+  const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
+    { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
+    { $set: { estado: "Deudor" } }
+  ).select("nombre fechas.fechaVencimientoSuscripcion");
+  console.log(verificarEstadoDeDeuda);
+
+  try {
+  } catch (error) {
+    console.log(error);
+  }
+};
+verificarEstadoDeDeudas();

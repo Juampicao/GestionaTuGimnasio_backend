@@ -19,7 +19,6 @@ router
 
 router
   .route("/pagarsuscripcion/:id")
-  // .post(checkAuth, pagarSuscripcion)
   .get(checkAuth, GetPagoSuscripcionId)
   .put(checkAuth, EditarPagoSuscripcion)
   .delete(checkAuth, DeletePagoSuscripcion);
