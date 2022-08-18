@@ -51,9 +51,3 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log("Servidor Corriendo en el puerto 4000");
 });
-
-// const AgregarUnaPropiedadAUnoEspecifico = await Suscriptor.updateOne(
-//   { nombre: "Alfredo" },
-//   { $set: { pagos: "62d30ddb9e73a0088fa71051" } }
-// );
-// console.log(AgregarUnaPropiedadAUnoEspecifico);

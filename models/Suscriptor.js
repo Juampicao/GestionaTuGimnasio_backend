@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import generarNumeroSocio from "../helpers/generarNumeroSocio.js";
+// import { generarNumeroSocio } from "../helpers/funciones";
 
 const SuscriptorSchema = mongoose.Schema(
   {
@@ -10,7 +10,6 @@ const SuscriptorSchema = mongoose.Schema(
     socio: {
       type: Number,
       required: true,
-      default: generarNumeroSocio(),
       unique: true,
     },
     estado: {
@@ -51,10 +50,12 @@ const SuscriptorSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",
     },
-    pagos: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Pagos",
-    },
+    pagos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Pagos",
+      },
+    ],
   },
   {
     timestamps: true,

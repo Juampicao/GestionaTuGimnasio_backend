@@ -1,5 +1,5 @@
 import Usuario from "../models/Usuario.js";
-import generarId from "../helpers/generarId.js";
+import { generarId } from "../helpers/funciones.js";
 import generarJWT from "../helpers/generarJWT.js";
 
 const registrar = async (req, res) => {

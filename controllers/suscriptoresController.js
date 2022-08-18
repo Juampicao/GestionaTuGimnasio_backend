@@ -1,8 +1,10 @@
 import Suscriptor from "../models/Suscriptor.js";
 import { verificarEstadoDeDeudas } from "../helpers/funciones.js";
-import { generarId } from "../helpers/generarId.js";
+// import { generarId } from "../helpers/generarId.js";
+import { generarId } from "../helpers/funciones.js";
 
 import Pagos from "../models/Pagos.js";
+import { generarNumeroSocio } from "../helpers/funciones.js";
 
 const obtenerSuscriptores = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -42,8 +44,7 @@ const obtenerSuscriptorId = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   const { id } = req.params;
-  const suscriptor = await Suscriptor.findById(id);
-  // const suscriptor2 = await Suscriptor.findById(id).populate("pagos");
+  const suscriptor = await Suscriptor.findById(id).populate("pagos");
 
   if (!suscriptor) {
     const error = new Error("Suscriptor No Encontrado");
@@ -64,7 +65,7 @@ const obtenerSuscriptorId = async (req, res) => {
   }
 
   res.json(suscriptor);
-  console.log(suscriptor.nombre, suscriptor._id);
+  console.log(suscriptor.nombre, suscriptor.socio);
 };
 
 const obtenerSuscriptorBySocio = async (req, res) => {
@@ -103,6 +104,7 @@ const crearSuscriptor = async (req, res) => {
 
   const suscriptor = new Suscriptor(req.body);
 
+  suscriptor.socio = generarNumeroSocio();
   suscriptor.creador = req.usuario._id;
   suscriptor.informacionPersonal.domicilio = req.body.domicilio;
   suscriptor.informacionPersonal.correo = req.body.correo;
@@ -128,7 +130,7 @@ const crearSuscriptor = async (req, res) => {
 
 const editarSuscriptorId = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  console.log("desde editar..");
+
   const { id } = req.params;
   const suscriptor = await Suscriptor.findById(id);
 
@@ -210,7 +212,6 @@ const editarRutina = async (req, res) => {
 const eliminarSuscriptorId = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  console.log("desde eliminar");
   const { id } = req.params;
 
   const suscriptor = await Suscriptor.findById(id);
@@ -239,42 +240,43 @@ const eliminarSuscriptorId = async (req, res) => {
 };
 
 const pagarSuscripcion = async (req, res) => {
-  const { id } = req.params;
+  console.log("Desde suscriptores Controller");
+  // const { id } = req.params;
 
-  const suscriptor = await Suscriptor.findById(req.body.suscriptorAPagar._id);
+  // const suscriptor = await Suscriptor.findById(req.body.suscriptorAPagar._id);
 
-  // 1° Nueva Fecha Vencimiento
-  const nuevaFechaVencimientoSuscripcion =
-    req.body.nuevaFechaVencimientoSuscripcion;
+  // // 1° Nueva Fecha Vencimiento
+  // const nuevaFechaVencimientoSuscripcion =
+  //   req.body.nuevaFechaVencimientoSuscripcion;
 
-  suscriptor.fechas.fechaVencimientoSuscripcion =
-    nuevaFechaVencimientoSuscripcion;
+  // suscriptor.fechas.fechaVencimientoSuscripcion =
+  //   nuevaFechaVencimientoSuscripcion;
 
-  // 2° Guardar fecha de pago.
-  const montoPagoSuscripcion = req.body.montoAPagar;
-  const nuevoPagoSuscripcion = req.body.fechaPagoSuscripcion;
-  const nuevoId = generarId();
+  // // 2° Guardar fecha de pago.
+  // const montoPagoSuscripcion = req.body.montoAPagar;
+  // const nuevoPagoSuscripcion = req.body.fechaPagoSuscripcion;
+  // const nuevoId = generarId();
 
-  const cambiarFechaPagoSuscripcion = await Suscriptor.updateOne(
-    { _id: req.body.suscriptorAPagar._id },
-    {
-      $push: {
-        "fechas.fechaPagoSuscripcion": {
-          id: nuevoId,
-          MontoPagoSuscripcion: montoPagoSuscripcion,
-          FechaDePago: nuevoPagoSuscripcion,
-        },
-      },
-    }
-  );
+  // const cambiarFechaPagoSuscripcion = await Suscriptor.updateOne(
+  //   { _id: req.body.suscriptorAPagar._id },
+  //   {
+  //     $push: {
+  //       "fechas.fechaPagoSuscripcion": {
+  //         id: nuevoId,
+  //         MontoPagoSuscripcion: montoPagoSuscripcion,
+  //         FechaDePago: nuevoPagoSuscripcion,
+  //       },
+  //     },
+  //   }
+  // );
 
-  try {
-    const nuevoPagoGuardado = await suscriptor.save();
-    // const verificarEstados = await verificarEstadoDeDeudas();
-    res.json(nuevoPagoGuardado);
-  } catch (error) {
-    console.log(error);
-  }
+  // try {
+  //   const nuevoPagoGuardado = await suscriptor.save();
+  //   // const verificarEstados = await verificarEstadoDeDeudas();
+  //   res.json(nuevoPagoGuardado);
+  // } catch (error) {
+  //   console.log(error);
+  // }
 };
 
 const EditarPagoSuscripcion = async (req, res) => {

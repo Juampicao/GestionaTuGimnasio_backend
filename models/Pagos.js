@@ -5,7 +5,12 @@ import Usuario from "./Usuario.js";
 const PagosSchema = mongoose.Schema(
   {
     // fechaPagoSuscripcion: { type: Array },
-    pagoUnico: {},
+    pagoUnico: {
+      montoPagoSuscripcion: { type: Number, required: true },
+      notasPagoSuscripcion: { type: String, required: false },
+      // fechaPagoSuscripcion: { type: Date, default: new Date() },
+      fechaPagoSuscripcion: {},
+    },
     suscriptorPagador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Suscriptor",
