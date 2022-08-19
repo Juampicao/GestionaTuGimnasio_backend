@@ -50,12 +50,46 @@ const pagarSuscripcion = async (req, res) => {
 const EditarPagoSuscripcion = async (req, res) => {
   // 1° Editar el contenido de la nota
   const { id } = req.params;
-  const pago = await Pagos.findById(id).where("creador").equals(req.usuario);
+  const { montoPagoSuscripcion, fechaPagoSuscripcion, notas, metodoPago } =
+    req.body;
 
-  pago.pagoUnico.montoPagoSuscripcion = req.body.montoPagoSuscripcion;
-  pago.pagoUnico.fechaPagoSuscripcion = req.body.fechaPagoSuscripcion;
-  pago.pagoUnico.notas = req.body.notas;
-  pago.pagoUnico.metodoPago = req.body.metodoPago;
+  const pago = await Pagos.findById(id);
+
+  // // 1° Verificar si es el creador de este pago
+  if (!pago) {
+    const error = new Error("Ningun pago se ha encontrado");
+    console.log(error);
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if (pago.creador.toString() !== req.usuario._id.toString()) {
+    const error = new Error("No tienes permiso para editar a este pago");
+    console.log(error);
+    return res.status(401).json({ msg: error.message });
+  }
+  // // 2° Editar y guardar.
+  // try {
+  //   const result = await Pagos.findByIdAndUpdate(
+  //     { _id: id },
+  //     {
+  //       montoPagoSuscripcion: montoPagoSuscripcion,
+  //       fechaPagoSuscripcion: fechaPagoSuscripcion,
+  //       notas: notas,
+  //       metodoPago: metodoPago,
+  //     }
+  //   );
+  //   const resultEditado = await result.save();
+  //   console.log(resultEditado);
+  //   res.json(resultEditado);
+  // } catch (error) {
+  //   console.log(error);
+  // }
+  // console.log(result);
+
+  pago.pagoUnico.montoPagoSuscripcion = montoPagoSuscripcion;
+  pago.pagoUnico.fechaPagoSuscripcion = fechaPagoSuscripcion;
+  pago.pagoUnico.notas = notas;
+  pago.pagoUnico.metodoPago = metodoPago;
 
   try {
     const pagoEditado = await pago.save();

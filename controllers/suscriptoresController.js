@@ -6,6 +6,8 @@ import { generarId } from "../helpers/funciones.js";
 import Pagos from "../models/Pagos.js";
 import { generarNumeroSocio } from "../helpers/funciones.js";
 
+let hoy = new Date();
+
 const obtenerSuscriptores = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -130,7 +132,6 @@ const crearSuscriptor = async (req, res) => {
 
 const editarSuscriptorId = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-
   const { id } = req.params;
   const suscriptor = await Suscriptor.findById(id);
 
@@ -166,21 +167,24 @@ const editarSuscriptorId = async (req, res) => {
   suscriptor.tipoSuscripcion =
     req.body.tipoSuscripcion || suscriptor.tipoSuscripcion;
 
-  // suscriptor.fechas.fechaAlta =
-  //   req.body.fechas.fechaAlta || suscriptor.fechas.fechaAlta;
-  // suscriptor.fechas.fechaPagoSuscripcion =
-  //   req.body.fechas.fechaPagoSuscripcion ||
-  //   suscriptor.fechas.fechaPagoSuscripcion;
-  // suscriptor.fechas.fechaVencimientoSuscripcion =
-  //   req.body.fechas.fechaVencimientoSuscripcion ||
-  //   suscriptor.fechas.fechaVencimientoSuscripcion;
+  suscriptor.fechas.fechaVencimientoSuscripcion =
+    new Date(req.body.fechaVencimientoSuscripcion) ||
+    suscriptor.fechas.fechaVencimientoSuscripcion;
 
-  // suscriptor.rutina = req.body.rutina || suscriptor.rutina;
+  if (suscriptor.fechas.fechaVencimientoSuscripcion < hoy) {
+    suscriptor.estado = "Deudor";
+    console.log("Cambio a Deudor");
+  } else if (suscriptor.fechas.fechaVencimientoSuscripcion >= hoy) {
+    suscriptor.estado = "Activo";
+    console.log("Cambio a Activo");
+  }
+
+  suscriptor.rutina = req.body.rutina || suscriptor.rutina;
 
   try {
     const suscriptorAlmacenado = await suscriptor.save();
     res.json(suscriptorAlmacenado);
-    console.log(suscriptorAlmacenado);
+    console.log("Editaste a :" + suscriptorAlmacenado.nombre);
   } catch (error) {
     console.log(error);
   }
@@ -296,36 +300,60 @@ const EliminarPagoSuscripcion = async (req, res) => {
 };
 
 const verificarEstadoDeDeudas = async (req, res) => {
-  // res.setHeader("Access-Control-Allow-Origin", "*");
-  // const { id } = req.params;
+  const verificarEstadoDeDeudas = async () => {
+    let hoy = new Date();
+    console.log("Dia de hoy: " + hoy);
+    let suscriptoresTotales = await Suscriptor.find().count();
+    let suscriptoresActivos = await Suscriptor.find()
+      .where("estado")
+      .equals("Activo")
+      .count();
+    let suscriptoresDeudores = await Suscriptor.find()
+      .where("estado")
+      .equals("Deudor")
+      .count();
 
-  console.log("DESDE VERIFICANDO");
-  // let hoy = new Date();
-  // let suscriptoresTotales = await Suscriptor.find().count();
-  // console.log(suscriptoresTotales);
+    let resultado =
+      "Totales " +
+      suscriptoresTotales +
+      " Activos: " +
+      suscriptoresActivos +
+      " Deudores: " +
+      suscriptoresDeudores;
 
-  // const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
-  //   { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
-  //   { $set: { estado: "Activo" } }
-  // ).select("nombre fechas.fechaVencimientoSuscripcion");
-  // console.log(verificarEstadoDeActivo);
+    console.log(resultado);
 
-  // const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
-  //   { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
-  //   { $set: { estado: "Deudor" } }
-  // ).select("nombre fechas.fechaVencimientoSuscripcion");
-  // console.log(verificarEstadoDeDeuda);
+    const verificarEstadoDeActivo = await Suscriptor.updateMany(
+      { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
+      { $set: { estado: "Activo" } }
+    ).select("nombre fechas.fechaVencimientoSuscripcion");
 
-  // try {
-  //   for (let i = 0; i < suscriptoresTotales; i++) {
-  //     const verificarEstados = await verificarEstadoDeDeudas();
-  //     return;
-  //   }
-  //   res.json(verificarEstadoDeDeuda);
-  //   res.json(verificarEstadoDeActivo);
-  // } catch (error) {
-  //   console.log(error);
-  // }
+    const verificarEstadoDeDeuda = await Suscriptor.updateMany(
+      { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
+      { $set: { estado: "Deudor" } }
+    ).select("nombre fechas.fechaVencimientoSuscripcion");
+
+    try {
+      let ActualizadoSuscriptoresActivos = await Suscriptor.find()
+        .where("estado")
+        .equals("Activo")
+        .count();
+      let ActualizadoSuscriptoresDeudores = await Suscriptor.find()
+        .where("estado")
+        .equals("Deudor")
+        .count();
+      let nuevoResultado =
+        "Nuevo activos :" +
+        ActualizadoSuscriptoresActivos +
+        "Nuevos Deudores: " +
+        ActualizadoSuscriptoresDeudores;
+      console.log(nuevoResultado);
+      res.json({ respuesta: nuevoResultado });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  verificarEstadoDeDeudas();
 };
 
 export {

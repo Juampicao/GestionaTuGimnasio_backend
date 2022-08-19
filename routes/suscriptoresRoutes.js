@@ -44,6 +44,6 @@ router
   .route("/obtenersuscriptorporsocio")
   .get(checkAuth, obtenerSuscriptorBySocio);
 
-router.route("/verificarestadodeuda").get(checkAuth, verificarEstadoDeDeudas);
+router.route("/verificar/estadodeuda").get(checkAuth, verificarEstadoDeDeudas);
 
 export default router;
