@@ -38,14 +38,13 @@ const SuscriptorSchema = mongoose.Schema(
         type: Date,
         default: new Date(),
       },
-      fechaPagoSuscripcion: { type: Array },
       fechaVencimientoSuscripcion: {
         type: Date,
         default: new Date(),
       },
     },
-    rutina: { type: Array, default: [""] },
-
+    // rutina: [{ default: "" }],
+    rutina: [{ default: "" }],
     creador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",

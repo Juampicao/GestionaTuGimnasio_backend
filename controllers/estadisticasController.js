@@ -1,15 +1,69 @@
 import Suscriptor from "../models/Suscriptor.js";
+import Pagos from "../models/Pagos.js";
 
-const getSuscriptoresUnicosActivos = async (req, res) => {
-  const suscriptoresUnicosActivos = await Suscriptor.find()
-    .where("estado")
-    .equals("Activo")
-    .count();
+const getEstadisticasEstadosSuscriptores = async (req, res) => {
+  const { id } = req.params;
 
-  console.log(suscriptoresUnicosActivos);
-  res.json({
-    suscriptoresUnicosActivos,
-  });
+  const suscriptoresActivos = await Suscriptor.find({
+    $and: [{ creador: req.usuario }, { estado: "Activo" }],
+  }).count();
+
+  const suscriptoresDeudores = await Suscriptor.find({
+    $and: [{ creador: req.usuario }, { estado: "Deudor" }],
+  }).count();
+
+  const suscriptoresTotales = await Suscriptor.find({
+    $and: [{ creador: req.usuario }],
+  }).count();
+
+  // const obtenerEstadosSuscriptores = await Suscriptor.aggregate([
+  //   {
+  //     $match: {
+  //       $and: [{ creador: req.usuario._id }],
+  //     },
+  //   },
+  //   {
+  //     $group: {
+  //       _id: "$estado",
+  //       estado: { $sum: 1 },
+  //     },
+  //   },
+  // ]);
+
+  const obtenerMontosTotalesPorMesPorCuota = await Pagos.aggregate([
+    {
+      $match: {
+        $and: [{ creador: req.usuario._id }],
+      },
+    },
+    {
+      $group: {
+        _id: {
+          mes: { $month: "$pagoUnico.fechaPagoSuscripcion" },
+        },
+        montoPagoSuscripcion: { $sum: "$pagoUnico.montoPagoSuscripcion" },
+      },
+    },
+  ]);
+
+  try {
+    console.log(
+      suscriptoresActivos,
+      suscriptoresDeudores,
+      suscriptoresTotales,
+      // obtenerEstadosSuscriptores,
+      obtenerMontosTotalesPorMesPorCuota
+    );
+    res.json({
+      suscriptoresActivos,
+      suscriptoresDeudores,
+      suscriptoresTotales,
+      // obtenerEstadosSuscriptores,
+      obtenerMontosTotalesPorMesPorCuota,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const getSuscriptoresUnicosDeudores = async (req, res) => {
@@ -54,7 +108,7 @@ const getCantidadCuotasPagadas = async (req, res) => {
 // Ganancias Bruta del mes (utilidad ingresos - gastos).
 
 export {
-  getSuscriptoresUnicosActivos,
+  getEstadisticasEstadosSuscriptores,
   getSuscriptoresUnicosDeudores,
   getCantidadCuotasPagadas,
 };

@@ -1,59 +1,14 @@
 import Suscriptor from "../models/Suscriptor.js";
 
-// export const verificarEstadoDeDeudas = async () => {
-//   // res.setHeader("Access-Control-Allow-Origin", "*");
-//   // const { id } = req.params;
-
-//   console.log("Verificando estado de deudas...");
+// export const verificarEstadoPorId = async (suscriptor, fecha) => {
 //   let hoy = new Date();
-//   let suscriptoresTotales = await Suscriptor.find().count();
-//   console.log(suscriptoresTotales);
 
-//   const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
-//     { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
-//     { $set: { estado: "Activo" } }
-//   ).select("nombre fechas.fechaVencimientoSuscripcion");
-//   console.log(verificarEstadoDeActivo);
-
-//   const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
-//     { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
-//     { $set: { estado: "Deudor" } }
-//   ).select("nombre fechas.fechaVencimientoSuscripcion");
-//   console.log(verificarEstadoDeDeuda);
-
-//   try {
-//     for (let i = 0; i < suscriptoresTotales; i++) {
-//       const verificarEstados = await verificarEstadoDeDeudas();
-//       return;
-//     }
-//     res.json(verificarEstadoDeDeuda);
-//     res.json(verificarEstadoDeActivo);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// const verificarEstadoDeDeudas = async () => {
-//   let hoy = new Date();
-//   console.log(hoy);
-//   let suscriptoresTotales = await Suscriptor.find().count();
-//   console.log(suscriptoresTotales);
-
-//   const verificarEstadoDeActivo = await Suscriptor.findOneAndUpdate(
-//     { "fechas.fechaVencimientoSuscripcion": { $gte: hoy } },
-//     { $set: { estado: "Activo" } }
-//   ).select("nombre fechas.fechaVencimientoSuscripcion");
-//   console.log(verificarEstadoDeActivo);
-
-//   const verificarEstadoDeDeuda = await Suscriptor.findOneAndUpdate(
-//     { "fechas.fechaVencimientoSuscripcion": { $lt: hoy } },
-//     { $set: { estado: "Deudor" } }
-//   ).select("nombre fechas.fechaVencimientoSuscripcion");
-//   console.log(verificarEstadoDeDeuda);
-
-//   try {
-//   } catch (error) {
-//     console.log(error);
+//   if (suscriptor.fechas.fechaVencimientoSuscripcion < hoy) {
+//     suscriptor.estado = "Deudor";
+//     console.log("Cambio a Deudor");
+//   } else if (suscriptor.fechas.fechaVencimientoSuscripcion >= hoy) {
+//     suscriptor.estado = "Activo";
+//     console.log("Cambio a Activo");
 //   }
 // };
 
@@ -72,4 +27,11 @@ export default {
   // verificarEstadoDeDeudas,
   generarId,
   generarNumeroSocio,
+  // verificarEstadoPorId,
 };
+
+// 1 Verificar por id =>
+// Pasarlo a CrearPago con params
+
+// 2 VerificarEstadoDeudas Global =>
+//

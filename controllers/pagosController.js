@@ -1,6 +1,8 @@
 import Suscriptor from "../models/Suscriptor.js";
 import Pagos from "../models/Pagos.js";
 
+let hoy = new Date();
+
 const pagarSuscripcion = async (req, res) => {
   console.log("desde pagosController..");
   const pago = new Pagos(req.body);
@@ -26,13 +28,21 @@ const pagarSuscripcion = async (req, res) => {
   suscriptor.fechas.fechaVencimientoSuscripcion =
     nuevaFechaVencimientoSuscripcion;
 
-  pago.pagoUnico = req.body.pagoUnico; // Guardar cualquier contenido.
+  // pago.pagoUnico = req.body.pagoUnico; // Guardar cualquier contenido.
   pago.pagoUnico = {
     montoPagoSuscripcion,
     fechaPagoSuscripcion,
     notasPagoSuscripcion,
     metodoPago,
   };
+
+  if (suscriptor.fechas.fechaVencimientoSuscripcion < hoy) {
+    suscriptor.estado = "Deudor";
+    console.log("Cambio a Deudor");
+  } else if (suscriptor.fechas.fechaVencimientoSuscripcion >= hoy) {
+    suscriptor.estado = "Activo";
+    console.log("Cambio a Activo");
+  }
 
   try {
     const nuevoPagoGuardado = await pago.save();
