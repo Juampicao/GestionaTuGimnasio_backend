@@ -1,6 +1,8 @@
 import Suscriptor from "../models/Suscriptor.js";
 import Pagos from "../models/Pagos.js";
 
+import { hoy } from "../helpers/funciones.js";
+
 const getEstadisticasEstadosSuscriptores = async (req, res) => {
   const { id } = req.params;
 
@@ -15,20 +17,6 @@ const getEstadisticasEstadosSuscriptores = async (req, res) => {
   const suscriptoresTotales = await Suscriptor.find({
     $and: [{ creador: req.usuario }],
   }).count();
-
-  // const obtenerEstadosSuscriptores = await Suscriptor.aggregate([
-  //   {
-  //     $match: {
-  //       $and: [{ creador: req.usuario._id }],
-  //     },
-  //   },
-  //   {
-  //     $group: {
-  //       _id: "$estado",
-  //       estado: { $sum: 1 },
-  //     },
-  //   },
-  // ]);
 
   const obtenerMontosTotalesPorMesPorCuota = await Pagos.aggregate([
     {
@@ -46,48 +34,96 @@ const getEstadisticasEstadosSuscriptores = async (req, res) => {
     },
   ]);
 
+  const obtenerCantidadCuotasPagasPorMes = await Pagos.aggregate([
+    {
+      $match: {
+        $and: [{ creador: req.usuario._id }],
+      },
+    },
+    {
+      $group: {
+        _id: {
+          mes: { $month: "$pagoUnico.fechaPagoSuscripcion" },
+        },
+        cantidadCuotas: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const obtenerCantidadCuotasPorTipoSuscripcion = await Suscriptor.aggregate([
+    {
+      $match: {
+        $and: [{ creador: req.usuario._id }, { estado: "Activo" }],
+      },
+    },
+    {
+      $group: {
+        _id: {
+          tipoSuscripcion: "$tipoSuscripcion",
+        },
+        cantidadCuotas: { $sum: 1 },
+      },
+    },
+  ]);
+  console.log(obtenerCantidadCuotasPorTipoSuscripcion);
+
   try {
-    console.log(
-      suscriptoresActivos,
-      suscriptoresDeudores,
-      suscriptoresTotales,
-      // obtenerEstadosSuscriptores,
-      obtenerMontosTotalesPorMesPorCuota
-    );
     res.json({
       suscriptoresActivos,
       suscriptoresDeudores,
       suscriptoresTotales,
-      // obtenerEstadosSuscriptores,
       obtenerMontosTotalesPorMesPorCuota,
+      obtenerCantidadCuotasPagasPorMes,
+      obtenerCantidadCuotasPorTipoSuscripcion,
     });
   } catch (error) {
     console.log(error);
   }
 };
 
-const getSuscriptoresUnicosDeudores = async (req, res) => {
-  const suscriptoresUnicosDeudores = await Suscriptor.find()
-    .where("estado")
-    .equals("Deudor")
-    .count();
+const getEstadisticasPorFechaPersonalizada = async (req, res) => {
+  const { fecha } = req.query;
 
-  console.log(suscriptoresUnicosDeudores);
-  res.json({
-    suscriptoresUnicosDeudores,
-  });
-};
+  console.log(fecha.toString());
 
-const getCantidadCuotasPagadas = async (req, res) => {
-  const suscriptoresUnicosDeudores = await Suscriptor.find()
-    .where("estado")
-    .equals("Deudor")
-    .count();
+  // if (fecha.toString() === "Invalid Date") {
+  //   console.log("La fecha es invalida...");
+  //   res.json("La fecha es invalida");
+  //   return;
+  // } else {
+  //   const nuevaFecha = new Date(fecha).toISOString();
+  // }
 
-  console.log(suscriptoresUnicosDeudores);
-  res.json({
-    suscriptoresUnicosDeudores,
-  });
+  const nuevaFecha = new Date(fecha).toISOString();
+
+  let HastaFechaPersonalizada = new Date(fecha);
+  let DesdeFechaPersonalizada = new Date();
+  DesdeFechaPersonalizada.setDate(HastaFechaPersonalizada.getDate() - 1);
+
+  const obtenerUtilidadVentasHoy = await Pagos.aggregate([
+    {
+      $match: {
+        $and: [
+          { creador: req.usuario._id },
+          {
+            "pagoUnico.fechaPagoSuscripcion": {
+              $gte: DesdeFechaPersonalizada,
+              $lte: HastaFechaPersonalizada,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: "$pagoUnico.metodoPago",
+        montoPagoSuscripcion: { $sum: "$pagoUnico.montoPagoSuscripcion" },
+        cantidadCuotas: { $sum: 1 },
+      },
+    },
+  ]);
+  console.log("Nueva fecha: " + nuevaFecha, obtenerUtilidadVentasHoy);
+  res.json({ obtenerUtilidadVentasHoy });
 };
 
 // const obtenerCuotasPagadasPorMes = await Suscriptor.aggregate([
@@ -109,6 +145,5 @@ const getCantidadCuotasPagadas = async (req, res) => {
 
 export {
   getEstadisticasEstadosSuscriptores,
-  getSuscriptoresUnicosDeudores,
-  getCantidadCuotasPagadas,
+  getEstadisticasPorFechaPersonalizada,
 };

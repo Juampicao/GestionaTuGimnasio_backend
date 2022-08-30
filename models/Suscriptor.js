@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 // import { generarNumeroSocio } from "../helpers/funciones";
+import Ejercicio from "./Ejercicio.js";
 
 const SuscriptorSchema = mongoose.Schema(
   {
@@ -43,8 +44,15 @@ const SuscriptorSchema = mongoose.Schema(
         default: new Date(),
       },
     },
-    // rutina: [{ default: "" }],
-    rutina: [{ default: "" }],
+    rutina: [
+      {
+        ejercicio: { type: mongoose.Schema.Types.ObjectId, ref: "Ejercicio" },
+        nombreEjercicio: "",
+        repeticiones: "",
+        series: "",
+        dias: "",
+      },
+    ],
     creador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",

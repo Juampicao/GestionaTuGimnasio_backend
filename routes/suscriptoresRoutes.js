@@ -11,8 +11,10 @@ import {
   pagarSuscripcion,
   EliminarPagoSuscripcion,
   EditarPagoSuscripcion,
+  PostEjercicioDeRutina,
   editarRutina,
   verificarEstadoDeDeudas,
+  EliminarEjercicioDeRutina,
 } from "../controllers/suscriptoresController.js";
 
 import checkAuth from "../middleware/checkAuth.js";
@@ -31,7 +33,14 @@ router
   .put(checkAuth, editarSuscriptorId)
   .delete(checkAuth, eliminarSuscriptorId);
 
-router.route("/rutina/:id").put(checkAuth, editarRutina);
+router
+  .route("/rutina/:id")
+  .get(checkAuth)
+  .post(checkAuth, PostEjercicioDeRutina);
+router
+  .route("/rutina/:id")
+  .put(checkAuth, editarRutina)
+  .delete(checkAuth, EliminarEjercicioDeRutina);
 
 router.route("/pagarsuscripcion").post(checkAuth, pagarSuscripcion);
 

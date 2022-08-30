@@ -16,6 +16,9 @@ const PagosSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Suscriptor",
     },
+    suscriptorPagadorNombre: {
+      type: String,
+    },
     creador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",

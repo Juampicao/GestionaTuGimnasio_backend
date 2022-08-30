@@ -4,13 +4,14 @@ import Pagos from "../models/Pagos.js";
 let hoy = new Date();
 
 const pagarSuscripcion = async (req, res) => {
-  console.log("desde pagosController..");
   const pago = new Pagos(req.body);
 
   pago.creador = req.usuario._id;
   pago.suscriptorPagador = req.body.suscriptorPagador;
 
   const suscriptor = await Suscriptor.findById(pago.suscriptorPagador);
+
+  pago.suscriptorPagadorNombre = suscriptor.nombre;
 
   console.log(req.body.metodoPago);
   // 1° Pago Suscripcion
@@ -141,13 +142,18 @@ const DeletePagoSuscripcion = async (req, res) => {
   }
 
   try {
-    await Pagos.deleteOne();
+    const pagoEliminado = await Pagos.deleteOne({ _id: pago._id });
     res.json({
-      msg: `Pago del suscriptor: ${pago.suscriptorPagador} por $ ${pago.pagoUnico.montoPagoSuscripcion} Eliminado`,
+      msg: `El pago id: ${pago._id}, monto:  ${pago.pagoUnico.montoPagoSuscripcion} fecha: ${pago.pagoUnico.fechaPagoSuscripcion}  fue eliminado`,
+      // msg: `El pago: ${pago.pagoUnico.fechaPagoSuscripcion}, del suscriptor: ${pago.suscriptorPagador} por $ ${pago.pagoUnico.montoPagoSuscripcion} Eliminado`,
     });
     console.log(
-      `Pago ${pago.pagoUnico.montoPagoSuscripcion} Eliminado. El suscriptor Creador fue: ${suscriptor.nombre}`
+      `El pago id: ${pago._id}, monto:  ${pago.pagoUnico.montoPagoSuscripcion} fecha: ${pago.pagoUnico.fechaPagoSuscripcion}  fue eliminado`
     );
+    // ${pago.pagoUnico.fechaPagoSuscripcion}, del suscriptor: ${pago.suscriptorPagador} por $ ${pago.pagoUnico.montoPagoSuscripcion} Eliminado`
+    // );
+    res.json({ msg: pagoEliminado });
+    console.log(pagoEliminado);
   } catch (error) {
     console.log(error);
   }
@@ -201,26 +207,37 @@ const GetPagosSuscripcionAllBySuscriptor = async (req, res) => {
 
 const GetPagosSuscripcionAll = async (req, res) => {
   const { id } = req.params;
+  let { page = 1, size = 2 } = req.query;
 
+  console.log(page, size);
+  try {
+    if (!page) {
+      page = 1;
+    }
+    if (!size) {
+      size = 2;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+  const limit = Number(size);
+  let skip = (page - 1) * size;
+
+  // sortParams = { fechaPagoSuscripcion: "descending" };
   const pagos = await Pagos.find()
     .where("creador")
     .equals(req.usuario)
-    .select("pagoUnico suscriptorPagador");
+    .select("pagoUnico suscriptorPagador _id suscriptorPagadorNombre")
+    .limit(limit)
+    .skip(skip)
+    .sort({ createdAt: "descending" });
 
-  if (!pagos) {
-    const error = new Error("Ningun pago se ha encontrado");
-    console.log(error);
-    return res.status(404).json({ msg: error.message });
-  }
-
-  if (pagos.creador.toString() !== req.usuario._id.toString()) {
-    const error = new Error("No tienes permiso para ver estos pagos");
-    console.log(error);
-    return res.status(401).json({ msg: error.message });
-  }
+  console.log("size: " + size + "page: " + page);
 
   try {
     res.json(pagos);
+    // console.log(pagos);
   } catch (error) {
     console.log(error);
   }

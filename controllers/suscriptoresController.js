@@ -5,6 +5,7 @@ import { generarId } from "../helpers/funciones.js";
 
 import Pagos from "../models/Pagos.js";
 import { generarNumeroSocio } from "../helpers/funciones.js";
+import Ejercicio from "../models/Ejercicio.js";
 
 let hoy = new Date();
 
@@ -16,7 +17,9 @@ const obtenerSuscriptores = async (req, res) => {
       `nombre estado fechas.fechaVencimientoSuscripcion socio tipoSuscripcion`
     )
     .where("creador")
-    .equals(req.usuario);
+    .equals(req.usuario)
+    .sort({ nombre: "ascending" });
+
   // console.log(suscriptores);
 
   if (!suscriptores) {
@@ -179,7 +182,7 @@ const editarSuscriptorId = async (req, res) => {
     console.log("Cambio a Activo");
   }
 
-  suscriptor.rutina = req.body.rutina || suscriptor.rutina;
+  // suscriptor.rutina = req.body.rutina || suscriptor.rutina;
 
   try {
     const suscriptorAlmacenado = await suscriptor.save();
@@ -213,9 +216,88 @@ const editarRutina = async (req, res) => {
   }
 };
 
-const eliminarSuscriptorId = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+const PostEjercicioDeRutina = async (req, res) => {
+  const { id } = req.params;
+  const { ejercicio, repeticiones, dias, series } = req.body.objeto; // Desde frontend
+  // const { ejercicio, repeticiones, dias } = req.body; // desde PostMan
 
+  // let ejericioId = ejercicio;
+
+  const suscriptor = await Suscriptor.findById(id);
+  const { rutina } = suscriptor;
+  console.log(suscriptor.nombre);
+  const nombreEjercicio = await Ejercicio.findById(ejercicio);
+
+  // Crear Ejercicio
+  const nuevoEjercicio = {
+    ejercicio: ejercicio,
+    nombreEjercicio: nombreEjercicio.nombre,
+    repeticiones: repeticiones,
+    dias: dias,
+    series: series,
+  };
+
+  // // Pushearlo a la rutina
+  const a = await rutina.push(nuevoEjercicio);
+
+  try {
+    const ejericicoAgregado = await suscriptor.save();
+    res.json({ msg: ejericicoAgregado.rutina });
+    console.log(ejericicoAgregado.rutina);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const EliminarEjercicioDeRutina = async (req, res) => {
+  const { id } = req.params;
+  const { ejercicio } = req.query;
+  let ejericioId = ejercicio;
+
+  const suscriptor = await Suscriptor.findById(id);
+  const { rutina } = suscriptor;
+
+  if (!ejericioId) {
+    res.json({ msg: "No hay ningun ejercicio con ese nombre" });
+    return;
+  } else if (rutina.length < 1) {
+    res.json({
+      msg: "La rutina esta vacia de ejercicios o falta no esta correcto el dueño del ejericico",
+    });
+    return;
+  }
+
+  function buscarEjercicio(e) {
+    return (e.ejericio = ejericioId);
+  }
+
+  let indexElementoAEliminar = rutina.findIndex(buscarEjercicio);
+  console.log(indexElementoAEliminar);
+
+  if (indexElementoAEliminar < 0) {
+    res.json({ msg: "No existe este ejercicio" });
+    return;
+  }
+
+  const removeElement = function (array, index) {
+    let newArray = [...array];
+    newArray.splice(index, 1);
+    return newArray;
+  };
+  let newArray = removeElement(rutina, indexElementoAEliminar);
+
+  suscriptor.rutina = newArray;
+
+  try {
+    const nuevoArray = await suscriptor.save();
+    console.log(nuevoArray.rutina);
+    res.json({ msg: nuevoArray.rutina });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const eliminarSuscriptorId = async (req, res) => {
   const { id } = req.params;
 
   const suscriptor = await Suscriptor.findById(id);
@@ -366,6 +448,8 @@ export {
   pagarSuscripcion,
   EliminarPagoSuscripcion,
   EditarPagoSuscripcion,
+  PostEjercicioDeRutina,
   editarRutina,
+  EliminarEjercicioDeRutina,
   verificarEstadoDeDeudas,
 };

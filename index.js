@@ -7,6 +7,7 @@ import usuarioRoutes from "./routes/usuarioRoutes.js";
 import suscriptoreRoutes from "./routes/suscriptoresRoutes.js";
 import estadisticasRoutes from "./routes/estadisticasRoutes.js";
 import pagosRoutes from "./routes/pagosRoutes.js";
+import ejercicsioRoutes from "./routes/ejerciciosRoutes.js";
 
 import Suscriptor from "./models/Suscriptor.js";
 import Usuario from "./models/Usuario.js";
@@ -45,6 +46,7 @@ app.use(`/usuarios`, usuarioRoutes);
 app.use(`/suscriptores`, suscriptoreRoutes);
 app.use(`/estadisticas`, estadisticasRoutes);
 app.use(`/pagos`, pagosRoutes);
+app.use(`/ejericicios`, ejercicsioRoutes);
 
 const PORT = process.env.PORT || 4000;
 

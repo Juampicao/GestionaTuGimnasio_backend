@@ -24,9 +24,7 @@ const usuarioSchema = mongoose.Schema(
       required: true,
       default: "Prueba",
     },
-    tiposSuscripcion: {
-      // type: Array,
-    },
+    tiposSuscripcion: [{}],
     token: {
       type: String,
     },
