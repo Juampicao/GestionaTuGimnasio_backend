@@ -17,15 +17,6 @@ import checkAuth from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
-// Prueba en POSTMAN.
-// router.get("/", (req, res) => {
-//   res.send("Desde api/usuarios");
-// });
-
-// router.post("/", (req, res) => {
-//   res.send("Post Usuarios");
-// });
-
 // Autenticacion, Registro y confirmacion de usuarios.
 router.post("/", registrar);
 router.post(`/login`, autenticar);

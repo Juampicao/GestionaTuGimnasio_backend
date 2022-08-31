@@ -3,6 +3,7 @@ import { generarId } from "../helpers/funciones.js";
 import generarJWT from "../helpers/generarJWT.js";
 import Ejercicio from "../models/Ejercicio.js";
 import Suscriptor from "../models/Suscriptor.js";
+import TipoSuscripcion from "../models/TipoSuscripcion.js";
 
 const registrar = async (req, res) => {
   // Evitar registros Duplicados
@@ -139,24 +140,42 @@ const perfil = async (req, res) => {
 };
 
 const postTiposSuscripcion = async (req, res) => {
+  // const { usuario } = req;
+  // const { nombre, valor, uid } = req.body.objeto;   // Frontend
+  // const { nombre, valor, uid } = req.body; // Postman
+
+  // const tiposSuscripcion = new TipoSuscripcion(req.body);
+
+  // tiposSuscripcion.creador = req.usuario;
+  // tiposSuscripcion.nombre = nombre;
+  // tiposSuscripcion.valor = valor;
+
+  // try {
+  //   const tiposSuscripcionGuardada = await tiposSuscripcion.save();
+  //   res.json({ tiposSuscripcionGuardada });
+  //   console.log(tiposSuscripcionGuardada);
+  // } catch (error) {
+  //   console.log(error);
+  // }
+
+  // 1°  Crear en TipoSuscripcion.js
   const { usuario } = req;
-  const { nombre, valor, uid } = req.body.objeto;
-  const buscarUsuario = await Usuario.findById(usuario._id);
-  const { tiposSuscripcion } = buscarUsuario;
+  const { nombre, valor } = req.body.objeto; // Postman
 
-  const nuevoTipoSuscripcion = {
-    nombre: nombre,
-    valor: valor,
-    uid: generarId(),
-  };
+  const nuevaSuscripcion = new TipoSuscripcion(req.body.objeto);
 
-  // Pushearlo a la rutina
-  const a = await tiposSuscripcion.push(nuevoTipoSuscripcion);
+  nuevaSuscripcion.creador = usuario._id; //Desde el front
+  nuevaSuscripcion.nombre = nombre;
+  nuevaSuscripcion.valor = valor;
 
   try {
-    const ejericicoAgregado = await buscarUsuario.save();
-    res.json({ msg: ejericicoAgregado.rutina });
-    console.log(ejericicoAgregado);
+    // 2° Agregarlo al Usuario.js
+    const nuevaSuscripcionGuardada = await nuevaSuscripcion.save();
+    const buscarUsuario = await Usuario.findById(usuario._id);
+    await buscarUsuario.tiposSuscripcion.push(nuevaSuscripcionGuardada._id);
+    await buscarUsuario.save();
+    await res.json({ nuevaSuscripcionGuardada });
+    await console.log(nuevaSuscripcionGuardada._id);
   } catch (error) {
     console.log(error);
   }
@@ -164,79 +183,88 @@ const postTiposSuscripcion = async (req, res) => {
 
 const obtenerTiposSuscripcion = async (req, res) => {
   const { usuario } = req;
-  const tiposSuscripcion = usuario.tiposSuscripcion;
+  const suscripciones = await Usuario.findById(usuario)
+    .populate({
+      path: "tiposSuscripcion._id",
+      model: "TipoSuscripcion",
+    })
+    .where("creador")
+    .equals(usuario);
 
-  console.log(tiposSuscripcion);
-  res.json({
-    tiposSuscripcion,
-  });
+  const { tiposSuscripcion: array } = suscripciones;
+
+  let tiposSuscripcion = [];
+  for (let i = 0; i < array.length; i++) {
+    let result = array[i]._id;
+    tiposSuscripcion.push(result);
+    console.log(result);
+  }
+  try {
+    res.json(tiposSuscripcion);
+    console.log(tiposSuscripcion);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const editarTiposSuscripcion = async (req, res) => {
-  const { usuario } = req;
-  const { nombre, valor, uid } = req.body.objeto;
-
-  const buscarUsuario = await Usuario.findById(usuario._id);
-
-  const query = { _id: usuario, "tiposSuscripcion.uid": uid };
-  const updateDocument = {
-    $set: {
-      "tiposSuscripcion.$.nombre": nombre,
-      "tiposSuscripcion.$.valor": valor,
-    },
-  };
-
+  const { nombre, valor, id } = req.body.objeto;
+  console.log(nombre, valor, id);
   try {
-    const result = await Usuario.updateOne(query, updateDocument);
+    const id = req.body.objeto.id;
+    const updates = req.body.objeto;
+    const options = { new: true };
+
+    const result = await TipoSuscripcion.findByIdAndUpdate(
+      id,
+      updates,
+      options
+    );
+    res.send(result);
     console.log(result);
-    res.json(result);
   } catch (error) {
     console.log(error);
-    res.json(error);
   }
 };
 
 const eliminarTiposSuscripcion = async (req, res) => {
-  const { uid, nuevasuscripcion } = req.query;
   const { usuario } = req;
-  console.log(nuevasuscripcion);
+  const { suscripcionAEliminarId, nuevaSuscripcionId } = req.query;
 
-  // Eliminar por alguna caraterisitcas especifica (insertar "suscripcion" en vez de UID: UID)
-  const suscripcion = {
-    nombre: "Gold",
-  };
+  console.log(
+    "Nueva es: " + suscripcionAEliminarId + "Vieja es: " + nuevaSuscripcionId
+  );
 
-  const eliminar = await Usuario.updateOne(
+  // 1° Eliminar de TipoSuscripcion
+  const tipoSuscripcion = await TipoSuscripcion.findByIdAndDelete(
+    suscripcionAEliminarId
+  );
+
+  //  2° Eliminar todo lo que aparezca la ref USUARIO.
+  const eliminarSuscripcion = await Usuario.updateMany(
     { _id: usuario },
     {
       $pull: {
         tiposSuscripcion: {
-          uid: uid,
+          _id: suscripcionAEliminarId,
         },
       },
     }
   );
 
-  const cambiarTipoSuscripcion = await Suscriptor.updateMany(
-    // { tipoSuscripcion:  },
-    // { $and: [
-    //   { creador: req.usuario },
-    //   {  "suscriptor.tipoSuscripcion" :   },
-    // ]},
+  // 3° Cambiar Vieja por Nueva Suscriptor
+  const CambiarViejaPorNueva = await Suscriptor.updateMany(
     {
-      $set: {
-        tipoSuscripcion: {
-          nuevasuscripcion,
-        },
-      },
-    }
+      $and: [{ creador: usuario }, { tipoSuscripcion: suscripcionAEliminarId }],
+    },
+    { $set: { tipoSuscripcion: nuevaSuscripcionId } }
   );
 
-  suscriptor.tipoSuscripcion =
-    req.body.tipoSuscripcion || suscriptor.tipoSuscripcion;
+  let respuesta = `Suscripcion Eliminada: ${tipoSuscripcion.nombre}\n eliminar red de usuario ${eliminarSuscripcion}\n Modificar suscripcion eliminada por nueva ${CambiarViejaPorNueva} `;
 
   try {
-    res.json(usuario.tiposSuscripcion);
+    res.json(respuesta);
+    console.log(respuesta);
   } catch (error) {
     console.log(error);
   }

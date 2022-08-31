@@ -13,8 +13,9 @@ const obtenerSuscriptores = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   const suscriptores = await Suscriptor.find()
+    .populate("tipoSuscripcion")
     .select(
-      `nombre estado fechas.fechaVencimientoSuscripcion socio tipoSuscripcion`
+      `nombre estado fechas.fechaVencimientoSuscripcion socio tipoSuscripcion `
     )
     .where("creador")
     .equals(req.usuario)
@@ -49,7 +50,10 @@ const obtenerSuscriptorId = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   const { id } = req.params;
-  const suscriptor = await Suscriptor.findById(id).populate("pagos");
+  const suscriptor = await Suscriptor.findById(id).populate([
+    "pagos",
+    "tipoSuscripcion",
+  ]);
 
   if (!suscriptor) {
     const error = new Error("Suscriptor No Encontrado");
@@ -168,7 +172,7 @@ const editarSuscriptorId = async (req, res) => {
     req.body.notas || suscriptor.informacionPersonal.notas;
 
   suscriptor.tipoSuscripcion =
-    req.body.tipoSuscripcion || suscriptor.tipoSuscripcion;
+    req.body.tipoSuscripcion || suscriptor.tipoSuscripcion._id;
 
   suscriptor.fechas.fechaVencimientoSuscripcion =
     new Date(req.body.fechaVencimientoSuscripcion) ||
@@ -325,62 +329,6 @@ const eliminarSuscriptorId = async (req, res) => {
   }
 };
 
-const pagarSuscripcion = async (req, res) => {
-  console.log("Desde suscriptores Controller");
-  // const { id } = req.params;
-
-  // const suscriptor = await Suscriptor.findById(req.body.suscriptorAPagar._id);
-
-  // // 1° Nueva Fecha Vencimiento
-  // const nuevaFechaVencimientoSuscripcion =
-  //   req.body.nuevaFechaVencimientoSuscripcion;
-
-  // suscriptor.fechas.fechaVencimientoSuscripcion =
-  //   nuevaFechaVencimientoSuscripcion;
-
-  // // 2° Guardar fecha de pago.
-  // const montoPagoSuscripcion = req.body.montoAPagar;
-  // const nuevoPagoSuscripcion = req.body.fechaPagoSuscripcion;
-  // const nuevoId = generarId();
-
-  // const cambiarFechaPagoSuscripcion = await Suscriptor.updateOne(
-  //   { _id: req.body.suscriptorAPagar._id },
-  //   {
-  //     $push: {
-  //       "fechas.fechaPagoSuscripcion": {
-  //         id: nuevoId,
-  //         MontoPagoSuscripcion: montoPagoSuscripcion,
-  //         FechaDePago: nuevoPagoSuscripcion,
-  //       },
-  //     },
-  //   }
-  // );
-
-  // try {
-  //   const nuevoPagoGuardado = await suscriptor.save();
-  //   // const verificarEstados = await verificarEstadoDeDeudas();
-  //   res.json(nuevoPagoGuardado);
-  // } catch (error) {
-  //   console.log(error);
-  // }
-};
-
-const EditarPagoSuscripcion = async (req, res) => {
-  // const { id } = req.params;
-  // const suscriptor = await Suscriptor.findById(req.body._id);
-  // // console.log(suscriptor.nombre + " " + "Socio: " + suscriptor.socio);
-  // console.log(suscriptor);
-};
-
-const EliminarPagoSuscripcion = async (req, res) => {
-  // const { id } = req.params;
-  // const suscriptor = await Suscriptor.findById(id);
-  // // 1 Buscar el suscriptor por id.
-  // // 2 Buscar el pago del suscriptor que coincida con el id.
-  // // 3 Eliminarlo.
-  // console.log(suscriptor);
-};
-
 const verificarEstadoDeDeudas = async (req, res) => {
   const verificarEstadoDeDeudas = async () => {
     let hoy = new Date();
@@ -445,9 +393,6 @@ export {
   crearSuscriptor,
   editarSuscriptorId,
   eliminarSuscriptorId,
-  pagarSuscripcion,
-  EliminarPagoSuscripcion,
-  EditarPagoSuscripcion,
   PostEjercicioDeRutina,
   editarRutina,
   EliminarEjercicioDeRutina,

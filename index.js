@@ -11,6 +11,7 @@ import ejercicsioRoutes from "./routes/ejerciciosRoutes.js";
 
 import Suscriptor from "./models/Suscriptor.js";
 import Usuario from "./models/Usuario.js";
+import TipoSuscripcion from "./models/TipoSuscripcion.js";
 // import { verificarEstadoDeDeudas } from "./helpers/funciones.js";
 
 const app = express();

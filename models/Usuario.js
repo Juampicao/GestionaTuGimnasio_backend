@@ -24,7 +24,19 @@ const usuarioSchema = mongoose.Schema(
       required: true,
       default: "Prueba",
     },
-    tiposSuscripcion: [{}],
+    // tiposSuscripcion: [{}],
+    // tiposSuscripcion: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "TipoSuscripcion",
+    // },
+    tiposSuscripcion: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "TipoSuscripcion",
+        },
+      },
+    ],
     token: {
       type: String,
     },

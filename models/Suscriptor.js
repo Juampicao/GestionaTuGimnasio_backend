@@ -28,11 +28,15 @@ const SuscriptorSchema = mongoose.Schema(
       fechaNacimiento: {},
       notas: {},
     },
+    // tipoSuscripcion: {
+    //   type: String,
+    //   trim: true,
+    //   required: true,
+    //   default: "Estandar",
+    // },
     tipoSuscripcion: {
-      type: String,
-      trim: true,
-      required: true,
-      default: "Estandar",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TipoSuscripcion",
     },
     fechas: {
       fechaAlta: {

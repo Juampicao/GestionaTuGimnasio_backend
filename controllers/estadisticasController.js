@@ -50,7 +50,7 @@ const getEstadisticasEstadosSuscriptores = async (req, res) => {
     },
   ]);
 
-  const obtenerCantidadCuotasPorTipoSuscripcion = await Suscriptor.aggregate([
+  const obtenerCantidadActivosTipoSuscripcion = await Suscriptor.aggregate([
     {
       $match: {
         $and: [{ creador: req.usuario._id }, { estado: "Activo" }],
@@ -64,8 +64,22 @@ const getEstadisticasEstadosSuscriptores = async (req, res) => {
         cantidadCuotas: { $sum: 1 },
       },
     },
+    // {
+    //   $lookup: {
+    //     from: "tipoSuscripcion",
+    //     localField: "tipoSuscripcion", // field in the suscripcion collection
+    //     foreignField: "tipoSuscripcion", // field in the items collection
+    //     as: "tipoSuscripcion",
+    //   },
+    // },
   ]);
-  console.log(obtenerCantidadCuotasPorTipoSuscripcion);
+
+  // await Suscriptor.populate(obtenerCantidadActivosTipoSuscripcion, {
+  //   path: "tiposSuscripcion._id",
+  //   model: "TipoSuscripcion",
+  // });
+
+  // console.log(obtenerCantidadActivosTipoSuscripcion);
 
   try {
     res.json({
@@ -74,7 +88,7 @@ const getEstadisticasEstadosSuscriptores = async (req, res) => {
       suscriptoresTotales,
       obtenerMontosTotalesPorMesPorCuota,
       obtenerCantidadCuotasPagasPorMes,
-      obtenerCantidadCuotasPorTipoSuscripcion,
+      obtenerCantidadActivosTipoSuscripcion,
     });
   } catch (error) {
     console.log(error);

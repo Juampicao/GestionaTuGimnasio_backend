@@ -8,9 +8,6 @@ import {
   crearSuscriptor,
   editarSuscriptorId,
   eliminarSuscriptorId,
-  pagarSuscripcion,
-  EliminarPagoSuscripcion,
-  EditarPagoSuscripcion,
   PostEjercicioDeRutina,
   editarRutina,
   verificarEstadoDeDeudas,
@@ -41,13 +38,6 @@ router
   .route("/rutina/:id")
   .put(checkAuth, editarRutina)
   .delete(checkAuth, EliminarEjercicioDeRutina);
-
-router.route("/pagarsuscripcion").post(checkAuth, pagarSuscripcion);
-
-router
-  .route("/pagarsuscripcion/:id")
-  .put(checkAuth, EditarPagoSuscripcion)
-  .delete(checkAuth, EliminarPagoSuscripcion);
 
 router
   .route("/obtenersuscriptorporsocio")
