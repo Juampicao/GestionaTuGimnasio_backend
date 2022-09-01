@@ -4,6 +4,9 @@
   "description": "Gestiona Tu Gimnasio",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js"
